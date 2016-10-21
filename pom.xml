@@ -5,7 +5,7 @@
     <groupId>fr.pilato.elasticsearch.crawler</groupId>
     <artifactId>fscrawler</artifactId>
     <packaging>jar</packaging>
-    <version>2.2-SNAPSHOT</version>
+    <version>5.0-SNAPSHOT</version>
     <name>Elasticsearch File System Crawler</name>
     <url>https://github.com/dadoonet/fscrawler/</url>
     <description>FS Crawler offers a simple way to index local files into elasticsearch.</description>
@@ -20,9 +20,9 @@
 
     <properties>
         <elasticsearch.groupid>org.elasticsearch.distribution.zip</elasticsearch.groupid>
-        <elasticsearch.version>5.0.0-alpha5</elasticsearch.version>
+        <elasticsearch.version>5.0.0-rc1</elasticsearch.version>
         <!-- Don't depend on elasticsearch.version here as it will fail with 1.x and 2.x series -->
-        <elasticsearch.client.version>5.0.0-alpha5</elasticsearch.client.version>
+        <elasticsearch.client.version>5.0.0-rc1</elasticsearch.client.version>
 
         <tika.version>1.13</tika.version>
         <jackson.version>2.8.1</jackson.version>
@@ -522,6 +522,7 @@
 
     <repositories>
         <!-- This repository is used to test with x-pack -->
+
         <repository>
             <id>elastic-download-service</id>
             <name>Elastic Download Service</name>
@@ -533,6 +534,19 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+
+        <repository>
+            <id>elastic-artifact-service</id>
+            <name>Elastic Artifact Service</name>
+            <url>https://artifacts.elastic.co/downloads/packs/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+
 
         <repository>
             <id>oss-snapshots</id>
