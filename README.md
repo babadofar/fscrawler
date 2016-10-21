@@ -1404,3 +1404,9 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 ```
+
+
+# Build with 5.0.rc1
+Download https://artifacts.elastic.co/downloads/packs/x-pack/x-pack-5.0.0-rc1.zip and cOpy the file x-pack-5.0.0-rc1.zip
+into the folder C:\Users\YOURUSERNAME\.m2\repository\org\elasticsearch\plugin\x-pack\5.0.0-rc1
+to run
