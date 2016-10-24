@@ -556,28 +556,29 @@ public class FsCrawlerImpl {
             try {
                 // Create the Doc object
                 Doc doc = new Doc();
-
-
+                String id = SignTool.sign((new File(filepath, filename)).toString());
                 if (fsSettings.getFs().isIndexContent()) {
                     if (fsSettings.getFs().isJsonSupport()) {
                         // https://github.com/dadoonet/fscrawler/issues/5 : Support JSon files
-                        doc =  DocParser.fromJson(read(inputStream));
-
+                        doc.setJsonObject(DocParser.fromJsonToMap(read(inputStream)));
+                        id = generateIdFromFilename(filename, filepath);
+/*
                         esIndex(fsSettings.getElasticsearch().getIndex(),
                                 fsSettings.getElasticsearch().getType(),
                                 generateIdFromFilename(filename, filepath),doc
                                 );
-                        return;
+                                */
+                        //return;
                     } else if (fsSettings.getFs().isXmlSupport()) {
                         // https://github.com/dadoonet/fscrawler/issues/185 : Support Xml files
-                        esIndex(fsSettings.getElasticsearch().getIndex(),
-                                fsSettings.getElasticsearch().getType(),
-                                generateIdFromFilename(filename, filepath),
-                                XmlDocParser.generate(inputStream));
-                        return;
+                        doc.setJsonObject(XmlDocParser.generateMap(inputStream));
+                        id = generateIdFromFilename(filename, filepath);
+
+
                     } else {
                         // Extracting content with Tika
                         generate(fsSettings, inputStream, filename, doc, messageDigest, filesize);
+
                     }
                 }
                 // File
@@ -609,7 +610,7 @@ public class FsCrawlerImpl {
                 // We index
                 esIndex(fsSettings.getElasticsearch().getIndex(),
                         fsSettings.getElasticsearch().getType(),
-                        SignTool.sign((new File(filepath, filename)).toString()),
+                        id,
                         doc);
             } finally {
                 // Let's close the stream
