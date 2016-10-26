@@ -19,6 +19,8 @@
 
 package fr.pilato.elasticsearch.crawler.fs;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import fr.pilato.elasticsearch.crawler.fs.client.BulkProcessor;
 import fr.pilato.elasticsearch.crawler.fs.client.DeleteRequest;
 import fr.pilato.elasticsearch.crawler.fs.client.ElasticsearchClient;
@@ -52,10 +54,14 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -557,16 +563,40 @@ public class FsCrawlerImpl {
                 // Create the Doc object
                 Doc doc = new Doc();
 
-
                 if (fsSettings.getFs().isIndexContent()) {
                     if (fsSettings.getFs().isJsonSupport()) {
                         // https://github.com/dadoonet/fscrawler/issues/5 : Support JSon files
-                        doc =  DocParser.fromJson(read(inputStream));
+                        Gson gson = new Gson();
+                        JsonObject json = gson.fromJson(read(inputStream), JsonObject.class);
+                        JsonObject path = new JsonObject();
+
+                        path.addProperty("root", stats.getRootPathId());
+                        path.addProperty("real",(new File(filepath, filename)).toString());
+                        path.addProperty("encoded",SignTool.sign(filepath));
+                        json.add("path",path);
+
+                        JsonObject file = new JsonObject();
+                        file.addProperty("filename", filename);
+                        file.addProperty("last_modified", lastmodified.toString());
+                        file.addProperty("indexing_date",Instant.now().toString());
+                        file.addProperty("url","file://" + (new File(filepath, filename)).toString());
+                        if (fsSettings.getFs().isAddFilesize()) {
+                            file.addProperty("filesize",size);
+                        }
+
+                        json.add("file",file);
 
                         esIndex(fsSettings.getElasticsearch().getIndex(),
                                 fsSettings.getElasticsearch().getType(),
-                                generateIdFromFilename(filename, filepath),doc
+                                generateIdFromFilename(filename, filepath),json.toString()
                                 );
+                        /*
+                        esIndex(fsSettings.getElasticsearch().getIndex(),
+                                fsSettings.getElasticsearch().getType(),
+                                SignTool.sign((new File(filepath, filename)).toString())
+                                ,json.toString());
+                                */
+
                         return;
                     } else if (fsSettings.getFs().isXmlSupport()) {
                         // https://github.com/dadoonet/fscrawler/issues/185 : Support Xml files
@@ -611,7 +641,12 @@ public class FsCrawlerImpl {
                         fsSettings.getElasticsearch().getType(),
                         SignTool.sign((new File(filepath, filename)).toString()),
                         doc);
-            } finally {
+
+            }
+            catch (Exception e){
+                System.out.println(e.getStackTrace().toString());
+            }
+            finally {
                 // Let's close the stream
                 inputStream.close();
             }
