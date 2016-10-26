@@ -19,8 +19,6 @@
 
 package fr.pilato.elasticsearch.crawler.fs;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import fr.pilato.elasticsearch.crawler.fs.client.BulkProcessor;
 import fr.pilato.elasticsearch.crawler.fs.client.DeleteRequest;
 import fr.pilato.elasticsearch.crawler.fs.client.ElasticsearchClient;
@@ -54,14 +52,10 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -177,14 +171,12 @@ public class FsCrawlerImpl {
         try {
             // If needed, we create the new mapping for files
             Path jobMappingDir = config.resolve(settings.getName()).resolve("_mappings");
-            if (!settings.getFs().isJsonSupport() && !settings.getFs().isXmlSupport()) {
-                // Read file mapping from resources
-                String mapping = FsCrawlerUtil.readMapping(jobMappingDir, config, elasticsearchVersion, FsCrawlerUtil.INDEX_TYPE_DOC);
-                ElasticsearchClient.pushMapping(client, settings.getElasticsearch().getIndex(), settings.getElasticsearch().getType(),
+            // Read file mapping from resources
+            String mapping = FsCrawlerUtil.readMapping(jobMappingDir, config, elasticsearchVersion, FsCrawlerUtil.INDEX_TYPE_DOC);
+            ElasticsearchClient.pushMapping(client, settings.getElasticsearch().getIndex(), settings.getElasticsearch().getType(),
                         mapping, updateMapping);
-            }
             // If needed, we create the new mapping for folders
-            String mapping = FsCrawlerUtil.readMapping(jobMappingDir, config, elasticsearchVersion, FsCrawlerUtil.INDEX_TYPE_FOLDER);
+            mapping = FsCrawlerUtil.readMapping(jobMappingDir, config, elasticsearchVersion, FsCrawlerUtil.INDEX_TYPE_FOLDER);
             ElasticsearchClient.pushMapping(client, settings.getElasticsearch().getIndex(), FsCrawlerUtil.INDEX_TYPE_FOLDER,
                     mapping, updateMapping);
         } catch (Exception e) {
@@ -592,12 +584,12 @@ public class FsCrawlerImpl {
                 if (fsSettings.getFs().isIndexContent()) {
                     if (fsSettings.getFs().isJsonSupport()) {
                         // https://github.com/dadoonet/fscrawler/issues/5 : Support JSon files
-                        doc.setJsonObject(DocParser.fromJsonToMap(read(inputStream)));
+                        doc.setJsonContent(DocParser.fromJsonToMap(read(inputStream)));
                         id = generateIdFromFilename(filename, filepath);
 
                     } else if (fsSettings.getFs().isXmlSupport()) {
                         // https://github.com/dadoonet/fscrawler/issues/185 : Support Xml files
-                        doc.setJsonObject(XmlDocParser.generateMap(inputStream));
+                        doc.setJsonContent(XmlDocParser.generateMap(inputStream));
                         id = generateIdFromFilename(filename, filepath);
 
 

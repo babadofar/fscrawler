@@ -31,7 +31,7 @@ public class Doc {
     private File file;
     private Path path;
     private Attributes attributes;
-    private Map jsonObject;
+    private Map jsonContent;
 
     public Doc() {
         meta = new Meta();
@@ -39,8 +39,8 @@ public class Doc {
         path = new Path();
     }
 
-    public Map getJsonObject (){return jsonObject;}
-    public void setJsonObject (Map newObject ) { this.jsonObject = newObject; }
+    public Map getJsonContent(){return jsonContent;}
+    public void setJsonContent(Map newObject ) { this.jsonContent = newObject; }
 
     public String getContent() {
         return content;

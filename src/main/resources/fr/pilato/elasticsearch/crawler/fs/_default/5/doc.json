@@ -68,6 +68,7 @@
         }
       }
     },
+    "json_content": {"type": "object"},
     "meta" : {
       "properties" : {
         "author" : {
