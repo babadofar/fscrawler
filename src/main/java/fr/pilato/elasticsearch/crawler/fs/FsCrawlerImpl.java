@@ -563,6 +563,7 @@ public class FsCrawlerImpl {
                 // Create the Doc object
                 Doc doc = new Doc();
 
+/*
                 if (fsSettings.getFs().isIndexContent()) {
                     if (fsSettings.getFs().isJsonSupport()) {
                         // https://github.com/dadoonet/fscrawler/issues/5 : Support JSon files
@@ -586,28 +587,24 @@ public class FsCrawlerImpl {
 
                         json.add("file",file);
 
-                        esIndex(fsSettings.getElasticsearch().getIndex(),
-                                fsSettings.getElasticsearch().getType(),
-                                generateIdFromFilename(filename, filepath),json.toString()
-                                );
-                        /*
-                        esIndex(fsSettings.getElasticsearch().getIndex(),
-                                fsSettings.getElasticsearch().getType(),
-                                SignTool.sign((new File(filepath, filename)).toString())
-                                ,json.toString());
-                                */
+*/
+                String id = SignTool.sign((new File(filepath, filename)).toString());
+                if (fsSettings.getFs().isIndexContent()) {
+                    if (fsSettings.getFs().isJsonSupport()) {
+                        // https://github.com/dadoonet/fscrawler/issues/5 : Support JSon files
+                        doc.setJsonObject(DocParser.fromJsonToMap(read(inputStream)));
+                        id = generateIdFromFilename(filename, filepath);
 
-                        return;
                     } else if (fsSettings.getFs().isXmlSupport()) {
                         // https://github.com/dadoonet/fscrawler/issues/185 : Support Xml files
-                        esIndex(fsSettings.getElasticsearch().getIndex(),
-                                fsSettings.getElasticsearch().getType(),
-                                generateIdFromFilename(filename, filepath),
-                                XmlDocParser.generate(inputStream));
-                        return;
+                        doc.setJsonObject(XmlDocParser.generateMap(inputStream));
+                        id = generateIdFromFilename(filename, filepath);
+
+
                     } else {
                         // Extracting content with Tika
                         generate(fsSettings, inputStream, filename, doc, messageDigest, filesize);
+
                     }
                 }
                 // File
@@ -639,7 +636,7 @@ public class FsCrawlerImpl {
                 // We index
                 esIndex(fsSettings.getElasticsearch().getIndex(),
                         fsSettings.getElasticsearch().getType(),
-                        SignTool.sign((new File(filepath, filename)).toString()),
+                        id,
                         doc);
 
             }
